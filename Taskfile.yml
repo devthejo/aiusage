@@ -65,17 +65,13 @@ tasks:
       - 'npm view aiusage version 2>/dev/null || echo "→ paquet pas encore publié"'
       - 'npm trust list aiusage 2>/dev/null || true'
 
-  bootstrap-trust:
-    desc: "Amorçage : publie la 1re version puis déclare GitHub Actions comme publieur de confiance"
-    # sans TTY, npm ne peut pas ouvrir son prompt 2FA et échoue en 403
+  trust:
+    desc: "Déclare GitHub Actions publieur de confiance (OIDC) — npm demandera un code 2FA"
+    # `npm trust` accepte un paquet qui n'existe pas encore, contrairement à
+    # l'interface web (npm/cli#8544) : la CI peut donc publier la 1re version en OIDC.
     interactive: true
     cmds:
-      # npm refuse de configurer un publieur de confiance sur un paquet inexistant
-      # (npm/cli#8544) : la première version doit sortir d'une session authentifiée.
-      # `--provenance` exige un environnement CI avec OIDC : pas en local.
-      # npm demandera un code 2FA : à lancer dans un terminal interactif.
       - npm whoami
-      - npm publish --access public
       - npm trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish
       - npm trust list aiusage
 

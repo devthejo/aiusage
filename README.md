@@ -117,18 +117,17 @@ task release -- 0.2.0   # tests, bump, tag, push
 L'authentification passe par le *trusted publishing* npm (OIDC) : aucun jeton à
 stocker. À défaut, le workflow accepte un secret `NPM_TOKEN`.
 
-**Amorçage.** npm refuse de configurer un publieur de confiance sur un paquet qui
-n'existe pas encore ([npm/cli#8544](https://github.com/npm/cli/issues/8544)) : la
-toute première version doit donc sortir d'une session authentifiée, une seule fois.
+**Amorçage.** Une seule fois, on déclare GitHub Actions publieur de confiance :
 
 ```bash
-npm login
-task bootstrap-trust   # publie 0.1.0, puis déclare GitHub Actions publieur de confiance
+task trust   # npm demande un code 2FA ; à lancer dans un terminal interactif
 ```
 
-À lancer dans un terminal interactif : npm réclame un code 2FA à chaque étape.
-
-Les versions suivantes passent par la CI, sans jeton.
+`npm trust` accepte un paquet qui n'existe pas encore — contrairement à
+l'interface web de npmjs.com, qui exige un paquet déjà publié
+([npm/cli#8544](https://github.com/npm/cli/issues/8544)). La toute première
+version peut donc, elle aussi, sortir de la CI en OIDC : aucun jeton n'est
+jamais créé ni stocké.
 
 ## Licence
 
