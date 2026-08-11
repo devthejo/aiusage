@@ -7,7 +7,7 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
-      dry-run:
+      dry_run:
         description: 'Simuler sans publier'
         type: boolean
         default: true
@@ -42,7 +42,7 @@ jobs:
           }
 
       - name: Publier
-        if: github.event_name == 'release' || inputs.dry-run == false
+        if: github.event_name == 'release' || inputs.dry_run == false
         run: npm publish --provenance --access public
         env:
           # Optionnel : si le secret existe on l'utilise, sinon npm bascule sur
@@ -50,5 +50,5 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Simulation
-        if: github.event_name == 'workflow_dispatch' && inputs.dry-run
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run
         run: npm publish --provenance --access public --dry-run
