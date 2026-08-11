@@ -67,6 +67,8 @@ tasks:
 
   bootstrap-trust:
     desc: "Amorçage : publie la 1re version puis déclare GitHub Actions comme publieur de confiance"
+    # sans TTY, npm ne peut pas ouvrir son prompt 2FA et échoue en 403
+    interactive: true
     cmds:
       # npm refuse de configurer un publieur de confiance sur un paquet inexistant
       # (npm/cli#8544) : la première version doit sortir d'une session authentifiée.
