@@ -41,15 +41,18 @@ suffit à démarrer.
 - **Les transcripts de sous-agents vivent dans `<projet>/<idSession>/subagents/`**
   et, pour les workflows, un cran plus bas. Ce ne sont pas des sessions : ils sont
   comptés à part, mais leurs tokens sont attribués à la surface de la session mère.
-- **L'œuf et la poule du trusted publishing n'existe que dans l'interface web.**
-  npmjs.com exige un paquet déjà publié pour y déclarer un publieur de confiance
-  ([npm/cli#8544](https://github.com/npm/cli/issues/8544)), mais `npm trust github`
-  (npm >= 11.10) l'accepte sur un nom encore libre. La toute première version part
-  donc de la CI en OIDC, sans qu'aucun jeton n'existe jamais. `task trust`.
-- **Une session `npm login --auth-type=web` ne peut pas écrire.** `npm publish` et
-  `npm trust` répondent « Two-factor authentication is required » sans même
-  consulter `--otp`. Il faut un terminal interactif pour que npm ouvre son prompt :
-  d'où `interactive: true` sur `task trust`.
+- **L'œuf et la poule du trusted publishing est réelle, côté registre.**
+  `POST /-/package/<nom>/trust` répond 404 « Package not found » tant que le paquet
+  n'existe pas ([npm/cli#8544](https://github.com/npm/cli/issues/8544)). Le
+  `--dry-run` de `npm trust` ne contacte pas le serveur et affiche une configuration
+  plausible : il ne prouve rien. La 1re version part de `task bootstrap`, la CI
+  prend le relais en OIDC ensuite.
+- **« 2FA required » de npm veut souvent dire « active la 2FA », pas « donne un
+  code ».** Sur un compte sans 2FA, `--otp` est ignoré et aucun prompt ne s'ouvre.
+  Vérifier d'abord : `npm profile get | grep two-factor` doit dire
+  `auth-and-writes`.
+- **`npm trust` exige npm >= 11.10**, alors que le nodejs de devbox embarque
+  11.6.2 : les tâches épinglent `npx npm@11`.
 - **Les messages « user » ne sont pas tous humains.** Un `type: "user"` peut être
   un résultat d'outil, une injection système (`isMeta`), un prompt SDK
   (`promptSource: "sdk"`) ou un prompt d'orchestration vers un sous-agent

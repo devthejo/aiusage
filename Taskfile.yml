@@ -65,17 +65,24 @@ tasks:
       - 'npm view aiusage version 2>/dev/null || echo "→ paquet pas encore publié"'
       - 'npm trust list aiusage 2>/dev/null || true'
 
-  trust:
-    desc: "Déclare GitHub Actions publieur de confiance (OIDC) — npm demandera un code 2FA"
-    # `npm trust` accepte un paquet qui n'existe pas encore, contrairement à
-    # l'interface web (npm/cli#8544) : la CI peut donc publier la 1re version en OIDC.
+  bootstrap:
+    desc: "Amorçage : publie la 1re version puis déclare GitHub Actions publieur de confiance"
+    # Le registre refuse POST /-/package/<nom>/trust tant que le paquet n'existe pas
+    # (404 « Package not found »), donc la toute première version part d'ici.
     interactive: true
     vars:
-      # `npm trust` n'existe qu'à partir de npm 11.10 ; celui que fournit devbox
-      # est plus ancien, donc on épingle explicitement.
-      NPM: npx --yes npm@latest
+      NPM: npx --yes npm@11   # `npm trust` exige npm >= 11.10 ; devbox fournit 11.6
     cmds:
       - '{{.NPM}} whoami'
+      - '{{.NPM}} publish --access public'
+      - task: trust
+
+  trust:
+    desc: "Déclare GitHub Actions publieur de confiance (OIDC) — exige un paquet déjà publié"
+    interactive: true
+    vars:
+      NPM: npx --yes npm@11
+    cmds:
       - '{{.NPM}} trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish'
       - '{{.NPM}} trust list aiusage'
 
