@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: ['18.17', '20', '22', '24']
+        include:
+          - os: macos-latest
+            node: '22'
+          - os: windows-latest
+            node: '22'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+
+  smoke:
+    name: Démarrage à froid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # aucun transcript sur le runner : le CLI doit le dire proprement, pas planter
+      - name: Sortie explicite sans données
+        run: |
+          set +e
+          out=$(node bin/aiusage.js --terminal --offline 2>&1)
+          code=$?
+          echo "$out"
+          [ "$code" -eq 1 ] || { echo "code de sortie attendu 1, obtenu $code"; exit 1; }
+          echo "$out" | grep -q 'aucun transcript trouvé' || { echo "message d'erreur inattendu"; exit 1; }
+      - run: node bin/aiusage.js --help
+      - name: Le tarball s'installe et s'exécute
+        run: |
+          npm pack
+          npm install -g ./aiusage-*.tgz
+          aiusage --version

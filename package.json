@@ -12,7 +12,16 @@
     "stats",
     "cli"
   ],
+  "homepage": "https://github.com/devthejo/aiusage#readme",
+  "bugs": {
+    "url": "https://github.com/devthejo/aiusage/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devthejo/aiusage.git"
+  },
   "license": "MIT",
+  "author": "devthejo",
   "type": "module",
   "bin": {
     "aiusage": "bin/aiusage.js"

@@ -1,0 +1,54 @@
+name: Publish
+
+# Déclenché par la publication d'une Release GitHub. La version publiée est celle
+# du package.json : `task release -- <version>` la pose, taggue et pousse.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Simuler sans publier'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write # provenance npm + publication sans jeton (trusted publishing)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: npm à jour (le trusted publishing exige >= 11.5.1)
+        run: npm install -g npm@latest
+
+      - run: npm test
+
+      - name: La version du tag doit correspondre au package.json
+        if: github.event_name == 'release'
+        run: |
+          pkg=$(node -p "require('./package.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+          [ "$pkg" = "$tag" ] || {
+            echo "package.json ($pkg) ≠ tag ($tag)"; exit 1;
+          }
+
+      - name: Publier
+        if: github.event_name == 'release' || inputs.dry-run == false
+        run: npm publish --provenance --access public
+        env:
+          # Optionnel : si le secret existe on l'utilise, sinon npm bascule sur
+          # le trusted publishing OIDC configuré côté npmjs.com.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Simulation
+        if: github.event_name == 'workflow_dispatch' && inputs.dry-run
+        run: npm publish --provenance --access public --dry-run

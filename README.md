@@ -107,3 +107,16 @@ dimensions des séries temporelles).
 ## Licence
 
 MIT
+
+## Publication
+
+La CI publie sur npm quand une **Release GitHub** est publiée. Le workflow vérifie
+d'abord que le tag correspond à la version du `package.json`, rejoue les tests,
+puis publie avec [provenance](https://docs.npmjs.com/generating-provenance-statements).
+
+```bash
+task release -- 0.2.0   # tests, bump, tag, push
+```
+
+L'authentification passe par le *trusted publishing* npm (OIDC) : aucun jeton à
+stocker. À défaut, le workflow accepte un secret `NPM_TOKEN`.

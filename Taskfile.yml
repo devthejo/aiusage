@@ -58,6 +58,19 @@ tasks:
     cmds:
       - node scripts/compare-ccusage.js
 
+  release:
+    desc: 'Pose une version, taggue et pousse — la CI publie sur la Release GitHub. Ex: task release -- 0.2.0'
+    cmds:
+      - test -n "{{.CLI_ARGS}}" || (echo "usage: task release -- <version>" && exit 1)
+      - test -z "$(git status --porcelain)" || (echo "arbre de travail sale" && exit 1)
+      - task test
+      - npm version {{.CLI_ARGS}} --no-git-tag-version
+      - git add package.json
+      - 'git commit -m "chore(release): v{{.CLI_ARGS}}"'
+      - git tag -a "v{{.CLI_ARGS}}" -m "v{{.CLI_ARGS}}"
+      - git push origin HEAD --tags
+      - 'echo "→ crée la Release GitHub sur le tag v{{.CLI_ARGS}} pour déclencher la publication"'
+
   clean:
     desc: Supprime les artefacts locaux
     cmds:

@@ -44,7 +44,9 @@ test('barres et sparklines restent dans leurs bornes', () => {
   assert.equal(spark([1, 8, 4]).length, 3);
 });
 
-test('walkFiles ignore les symlinks de répertoire', () => {
+test('walkFiles ignore les symlinks de répertoire',
+  { skip: process.platform === 'win32' ? 'symlinks non créables sans privilèges' : false },
+  () => {
   const root = mkdtempSync(join(tmpdir(), 'aiusage-walk-'));
   try {
     mkdirSync(join(root, 'a'));
