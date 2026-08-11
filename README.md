@@ -104,10 +104,6 @@ devbox install && task
 rapport est cohérent de bout en bout (périmètres emboîtés, sommes par surface,
 dimensions des séries temporelles).
 
-## Licence
-
-MIT
-
 ## Publication
 
 La CI publie sur npm quand une **Release GitHub** est publiée. Le workflow vérifie
@@ -120,3 +116,7 @@ task release -- 0.2.0   # tests, bump, tag, push
 
 L'authentification passe par le *trusted publishing* npm (OIDC) : aucun jeton à
 stocker. À défaut, le workflow accepte un secret `NPM_TOKEN`.
+
+## Licence
+
+MIT
