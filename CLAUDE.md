@@ -41,6 +41,11 @@ suffit à démarrer.
 - **Les transcripts de sous-agents vivent dans `<projet>/<idSession>/subagents/`**
   et, pour les workflows, un cran plus bas. Ce ne sont pas des sessions : ils sont
   comptés à part, mais leurs tokens sont attribués à la surface de la session mère.
+- **npm refuse de configurer un publieur de confiance sur un paquet inexistant**
+  ([npm/cli#8544](https://github.com/npm/cli/issues/8544)). L'œuf et la poule : la
+  première version doit sortir d'une session authentifiée (`npm login` puis
+  `task bootstrap-trust`), la CI prend le relais ensuite via OIDC. `npm trust`
+  (npm >= 11.10) évite l'interface web, mais exige d'être authentifié.
 - **Les messages « user » ne sont pas tous humains.** Un `type: "user"` peut être
   un résultat d'outil, une injection système (`isMeta`), un prompt SDK
   (`promptSource: "sdk"`) ou un prompt d'orchestration vers un sous-agent

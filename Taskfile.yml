@@ -58,6 +58,23 @@ tasks:
     cmds:
       - node scripts/compare-ccusage.js
 
+  npm-status:
+    desc: Qui suis-je sur npm, et le paquet existe-t-il ?
+    cmds:
+      - 'npm whoami || echo "→ non authentifié : lance npm login"'
+      - 'npm view aiusage version 2>/dev/null || echo "→ paquet pas encore publié"'
+      - 'npm trust list aiusage 2>/dev/null || true'
+
+  bootstrap-trust:
+    desc: "Amorçage : publie la 1re version puis déclare GitHub Actions comme publieur de confiance"
+    cmds:
+      # npm refuse de configurer un publieur de confiance sur un paquet inexistant
+      # (npm/cli#8544) : la première version doit sortir d'une session authentifiée.
+      - npm whoami
+      - npm publish --access public --provenance
+      - npm trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish
+      - npm trust list aiusage
+
   release:
     desc: 'Pose une version, taggue et pousse — la CI publie sur la Release GitHub. Ex: task release -- 0.2.0'
     cmds:
