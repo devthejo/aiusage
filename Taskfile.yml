@@ -71,7 +71,7 @@ tasks:
     # (404 « Package not found »), donc la toute première version part d'ici.
     interactive: true
     vars:
-      NPM: npx --yes npm@11   # `npm trust` exige npm >= 11.10 ; devbox fournit 11.6
+      NPM: npx --yes npm@11.17.0   # `npm trust` exige npm >= 11.10 ; devbox fournit 11.6
     cmds:
       - '{{.NPM}} whoami'
       - '{{.NPM}} publish --access public'
@@ -81,7 +81,7 @@ tasks:
     desc: "Déclare GitHub Actions publieur de confiance (OIDC) — exige un paquet déjà publié"
     interactive: true
     vars:
-      NPM: npx --yes npm@11
+      NPM: npx --yes npm@11.17.0
     cmds:
       - '{{.NPM}} trust github ai-agent-stats --file publish.yml --repo devthejo/ai-agent-stats --env npm --allow-publish'
       - '{{.NPM}} trust list ai-agent-stats'
