@@ -70,10 +70,14 @@ tasks:
     # `npm trust` accepte un paquet qui n'existe pas encore, contrairement à
     # l'interface web (npm/cli#8544) : la CI peut donc publier la 1re version en OIDC.
     interactive: true
+    vars:
+      # `npm trust` n'existe qu'à partir de npm 11.10 ; celui que fournit devbox
+      # est plus ancien, donc on épingle explicitement.
+      NPM: npx --yes npm@latest
     cmds:
-      - npm whoami
-      - npm trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish
-      - npm trust list aiusage
+      - '{{.NPM}} whoami'
+      - '{{.NPM}} trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish'
+      - '{{.NPM}} trust list aiusage'
 
   release:
     desc: 'Pose une version, taggue et pousse — la CI publie sur la Release GitHub. Ex: task release -- 0.2.0'
