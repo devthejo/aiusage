@@ -41,6 +41,6 @@
   },
   "scripts": {
     "start": "node bin/aiusage.js",
-    "test": "node --test 'test/*.test.js'"
+    "test": "node --test test/unit.test.js"
   }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -100,7 +100,7 @@ function progressBar(quiet) {
 const opts = parseArgs(process.argv.slice(2));
 if (opts.help) { console.log(HELP); process.exit(0); }
 if (opts.version) {
-  const { default: pkg } = await import('../package.json', { with: { type: 'json' } });
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   console.log(pkg.version);
   process.exit(0);
 }

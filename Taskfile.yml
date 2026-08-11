@@ -34,7 +34,7 @@ tasks:
   test:
     desc: Tests unitaires
     cmds:
-      - node --test 'test/*.test.js'
+      - node --test test/unit.test.js
 
   check:
     desc: Tests + vérification que le CLI démarre et produit un rapport complet

@@ -60,6 +60,8 @@ src/pricing.js        table LiteLLM, cache 24 h, résolution des noms de modèle
 src/report/           rendus terminal et HTML + formatage partagé
 assets/template.html  gabarit du rapport web, données injectées à la place de /*__DATA__*/
 scripts/              vérification de cohérence, comparaison ccusage
+test/                 fichiers nommés un par un dans `npm test` : `--test` n'expanse
+                      les globs qu'à partir de Node 22, or le socle est Node 18.17
 ```
 
 Le format d'échange entre worker et agrégateur est un `Float64Array` à plat, de
