@@ -1,0 +1,36 @@
+{
+  "name": "aiusage",
+  "version": "0.1.0",
+  "description": "Compte tes sessions, messages et tokens d'agents de codage — Claude Code, Roo Code, Cline, Codex — depuis les transcripts sur disque. Rapport HTML ou terminal.",
+  "keywords": [
+    "claude-code",
+    "roo-code",
+    "cline",
+    "codex",
+    "tokens",
+    "usage",
+    "stats",
+    "cli"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "aiusage": "bin/aiusage.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "assets",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "start": "node bin/aiusage.js",
+    "test": "node --test 'test/*.test.js'"
+  }
+}

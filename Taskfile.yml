@@ -1,0 +1,64 @@
+version: '3'
+
+silent: true
+
+tasks:
+  default:
+    desc: Liste les commandes
+    cmds:
+      - task --list
+
+  run:
+    desc: Rapport web (collecte + ouverture du navigateur)
+    cmds:
+      - node bin/aiusage.js {{.CLI_ARGS}}
+
+  term:
+    desc: Rapport terminal
+    cmds:
+      - node bin/aiusage.js --terminal {{.CLI_ARGS}}
+
+  json:
+    desc: Rapport brut en JSON dans build/report.json
+    cmds:
+      - mkdir -p build
+      - node bin/aiusage.js --json --quiet > build/report.json
+      - 'echo "→ build/report.json ($(du -h build/report.json | cut -f1))"'
+
+  html:
+    desc: Rapport HTML dans build/report.html, sans ouvrir le navigateur
+    cmds:
+      - mkdir -p build
+      - node bin/aiusage.js --out build/report.html --no-open
+
+  test:
+    desc: Tests unitaires
+    cmds:
+      - node --test 'test/*.test.js'
+
+  check:
+    desc: Tests + vérification que le CLI démarre et produit un rapport complet
+    deps: [test]
+    cmds:
+      - node bin/aiusage.js --help > /dev/null
+      - node bin/aiusage.js --json --quiet | node scripts/assert-report.js
+
+  bench:
+    desc: Chronomètre une collecte complète
+    cmds:
+      - 'time node bin/aiusage.js --json --quiet > /dev/null'
+
+  pack:
+    desc: Construit le tarball npm et liste son contenu
+    cmds:
+      - npm pack --dry-run
+
+  ccusage-diff:
+    desc: Compare les totaux de tokens avec ccusage (nécessite le réseau)
+    cmds:
+      - node scripts/compare-ccusage.js
+
+  clean:
+    desc: Supprime les artefacts locaux
+    cmds:
+      - rm -rf build *.tgz

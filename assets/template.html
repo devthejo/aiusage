@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aiusage — agents de codage sur cette machine</title>
+<style>
+.viz-root{
+  color-scheme:light;
+  --surface-1:#fcfcfb; --plane:#f9f9f7;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --hairline:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --other:#c3c2b7;
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])) .viz-root{
+    color-scheme:dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d;
+    --text-primary:#fff; --text-secondary:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --hairline:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+    --other:#52514e;
+  }
+}
+:root[data-theme="dark"] .viz-root{
+  color-scheme:dark;
+  --surface-1:#1a1a19; --plane:#0d0d0d;
+  --text-primary:#fff; --text-secondary:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --hairline:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --other:#52514e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane)}
+.viz-root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--plane);
+  color:var(--text-primary);padding:32px 24px 64px;max-width:1180px;margin:0 auto}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+.sub{color:var(--text-secondary);font-size:13px;line-height:1.5;margin:0;max-width:74ch}
+button{font:inherit;font-size:12px;cursor:pointer;border:1px solid var(--hairline);
+  background:var(--surface-1);color:var(--text-secondary);border-radius:7px;padding:5px 11px}
+button:hover{color:var(--text-primary)}
+button[aria-pressed="true"]{color:var(--text-primary);border-color:var(--axis)}
+.hero{background:var(--surface-1);border:1px solid var(--hairline);border-radius:14px;
+  padding:26px 28px;margin:26px 0 14px;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 26px}
+.hero .n{font-size:60px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.hero .lb{font-size:14px;color:var(--text-secondary);max-width:48ch;line-height:1.55}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:12px;margin-bottom:26px}
+.tile{background:var(--surface-1);border:1px solid var(--hairline);border-radius:12px;padding:15px 16px}
+.tile .lb{font-size:11.5px;color:var(--muted);margin-bottom:7px}
+.tile .v{font-size:26px;font-weight:600;line-height:1.05}
+.tile .d{font-size:11.5px;color:var(--text-secondary);margin-top:6px;line-height:1.45}
+.card{background:var(--surface-1);border:1px solid var(--hairline);border-radius:14px;
+  padding:20px 22px 18px;margin-bottom:16px}
+.card h2{font-size:14.5px;font-weight:600;margin:0 0 3px}
+.card .cs{font-size:12px;color:var(--text-secondary);margin:0 0 16px;line-height:1.5;max-width:84ch}
+.chead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.seg{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.seg button{font-size:11.5px;padding:4px 10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 14px;font-size:12px;color:var(--text-secondary)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:11px;height:11px;border-radius:3px;display:block}
+svg{display:block;width:100%;overflow:visible}
+.gl{stroke:var(--grid);stroke-width:1}
+.ax{stroke:var(--axis);stroke-width:1}
+text{fill:var(--muted);font-size:11px}
+text.val{fill:var(--text-primary);font-size:11.5px;font-weight:600}
+text.tick{font-variant-numeric:tabular-nums}
+.hit{fill:transparent;cursor:pointer}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}
+th,td{text-align:left;padding:7px 12px 7px 0;border-bottom:1px solid var(--grid);color:var(--text-secondary)}
+th{color:var(--muted);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+.tv{display:none;margin-top:14px}
+.tv.on{display:block}
+.note{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.6}
+.note li{margin-bottom:4px}
+.note ul{margin:6px 0 0;padding-left:18px}
+#tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;background:var(--surface-1);
+  border:1px solid var(--axis);border-radius:9px;padding:9px 12px;font-size:12px;
+  color:var(--text-primary);z-index:9;box-shadow:0 8px 22px rgba(0,0,0,.28);max-width:280px}
+#tip .r{display:flex;justify-content:space-between;gap:16px;margin-top:4px;color:var(--text-secondary)}
+#tip .r b{color:var(--text-primary);font-variant-numeric:tabular-nums}
+#tip i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px}
+code{font-size:.92em}
+</style>
+</head>
+<body>
+<div class="viz-root" id="root">
+  <header>
+    <div>
+      <h1>Agents de codage sur cette machine</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <button id="theme" aria-pressed="true">Thème clair</button>
+  </header>
+
+  <div class="hero"><div class="n" id="hero-n"></div><div class="lb" id="hero-l"></div></div>
+  <div class="tiles" id="tiles"></div>
+
+  <div class="card" id="card-surf">
+    <div class="chead">
+      <div><h2>Sessions par surface</h2>
+        <p class="cs">Une session = un fil de conversation distinct sur disque. Les sous-agents,
+        ouverts par l’IA et non par un humain, sont comptés à part.</p></div>
+      <button class="tt" data-t="t-surf" aria-pressed="false">Tableau</button>
+    </div>
+    <svg id="c-surf"></svg><div class="tv" id="t-surf"></div>
+  </div>
+
+  <div class="card" id="card-tl">
+    <div class="chead">
+      <div><h2>Sessions démarrées, par semaine</h2>
+        <p class="cs" id="cs-tl"></p></div>
+      <button class="tt" data-t="t-tl" aria-pressed="false">Tableau</button>
+    </div>
+    <div class="legend" id="l-tl"></div>
+    <svg id="c-tl"></svg><div class="tv" id="t-tl"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" id="card-tok">
+      <div class="chead">
+        <div><h2>Tokens, par semaine</h2><p class="cs" id="cs-tok"></p></div>
+        <button class="tt" data-t="t-tok" aria-pressed="false">Tableau</button>
+      </div>
+      <div class="seg" id="seg-tok">
+        <button data-k="total" aria-pressed="true">Cache compris</button>
+        <button data-k="fresh" aria-pressed="false">Hors relectures</button>
+        <button data-k="io" aria-pressed="false">Input + output</button>
+      </div>
+      <svg id="c-tok"></svg><div class="tv" id="t-tok"></div>
+    </div>
+    <div class="card" id="card-hr">
+      <div class="chead">
+        <div><h2>Heures d’activité</h2><p class="cs" id="cs-hr"></p></div>
+        <button class="tt" data-t="t-hr" aria-pressed="false">Tableau</button>
+      </div>
+      <svg id="c-hr"></svg><div class="tv" id="t-hr"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" id="card-mod">
+      <div class="chead">
+        <div><h2>Tokens par modèle</h2><p class="cs" id="cs-mod"></p></div>
+        <button class="tt" data-t="t-mod" aria-pressed="false">Tableau</button>
+      </div>
+      <svg id="c-mod"></svg><div class="tv" id="t-mod"></div>
+    </div>
+    <div class="card" id="card-tools">
+      <div class="chead">
+        <div><h2>Outils appelés par l’IA</h2>
+          <p class="cs">Appels relevés dans les transcripts Claude Code.</p></div>
+        <button class="tt" data-t="t-tools" aria-pressed="false">Tableau</button>
+      </div>
+      <svg id="c-tools"></svg><div class="tv" id="t-tools"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Comment lire le total de tokens</h2>
+    <p class="cs">Trois périmètres, trois ordres de grandeur. Un panneau d’usage qui n’additionne
+    que <code>input + output</code> ne mesure pas la même chose qu’une facture.</p>
+    <div id="t-break"></div>
+    <p class="note" id="n-break"></p>
+  </div>
+
+  <div class="card" id="card-notes">
+    <h2>Notes de collecte</h2>
+    <div class="note" id="notes"></div>
+  </div>
+
+  <div id="tip"></div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const $ = (s) => document.querySelector(s);
+const SC = ['--s1','--s2','--s3','--s4','--s5','--s6','--s7','--s8'];
+const col = (i) => (i < SC.length ? `var(${SC[i]})` : 'var(--other)');
+const NF = new Intl.NumberFormat('fr-FR');
+const fmt = (v) => NF.format(Math.round(v || 0));
+const compact = (v) => {
+  const x = Math.abs(v || 0);
+  if (x >= 1e9) return (v / 1e9).toFixed(1).replace('.', ',') + ' Md';
+  if (x >= 1e6) return (v / 1e6).toFixed(x >= 1e8 ? 0 : 1).replace('.', ',') + ' M';
+  if (x >= 1e4) return Math.round(v / 1e3) + ' k';
+  return fmt(v);
+};
+const pct = (v) => (v * 100).toFixed(1).replace('.', ',') + ' %';
+const MON = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const wlab = (w) => { const d = new Date(w + 'T00:00:00'); return d.getDate() + ' ' + MON[d.getMonth()]; };
+const NS = 'http://www.w3.org/2000/svg';
+
+function el(t, a, p){ const x = document.createElementNS(NS, t);
+  for (const k in a) x.setAttribute(k, a[k]); if (p) p.appendChild(x); return x; }
+function txt(s, a, p){ const x = el('text', a, p); x.textContent = s; return x; }
+function niceMax(v){ if (v <= 0) return 1;
+  const e = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / e * 4) / 4 * e; }
+/* extrémité arrondie côté donnée, carrée à la ligne de base ; sans arrondi si trop court */
+function hbar(x, y, w, h){
+  return w > 8 ? `M${x},${y} h${w-4} a4,4 0 0 1 4,4 v${h-8} a4,4 0 0 1 -4,4 h-${w-4} z`
+               : `M${x},${y} h${w} v${h} h-${w} z`;
+}
+function vbar(x, y, w, h){
+  return h > 5 ? `M${x},${y+h} v-${h-4} a4,4 0 0 1 4,-4 h${w-8} a4,4 0 0 1 4,4 v${h-4} z`
+               : `M${x},${y+h} v-${h} h${w} v${h} z`;
+}
+
+const tip = $('#tip');
+function showTip(e, html){
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY - r.height - 12;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y < 8) y = e.clientY + 18;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => { tip.style.opacity = 0; };
+function hover(node, html){
+  node.addEventListener('mousemove', (e) => showTip(e, html));
+  node.addEventListener('mouseleave', hideTip);
+  node.setAttribute('tabindex', '0');
+  node.addEventListener('focus', () => {
+    const b = node.getBoundingClientRect();
+    showTip({ clientX: b.left + b.width / 2, clientY: b.top }, html);
+  });
+  node.addEventListener('blur', hideTip);
+}
+function table(host, cols, rows){
+  const h = '<tr>' + cols.map((c, i) => `<th class="${i ? 'n' : ''}">${c}</th>`).join('') + '</tr>';
+  const b = rows.map((r) => '<tr>' + r.map((c, i) => `<td class="${i ? 'n' : ''}">${c}</td>`).join('') + '</tr>').join('');
+  document.getElementById(host).innerHTML = `<table>${h}${b}</table>`;
+}
+document.querySelectorAll('.tt').forEach((b) => b.addEventListener('click', () => {
+  const t = document.getElementById(b.dataset.t);
+  const on = t.classList.toggle('on');
+  b.setAttribute('aria-pressed', on);
+  b.textContent = on ? 'Masquer le tableau' : 'Tableau';
+}));
+
+/* ── en-tête ─────────────────────────────────────────────────────────────── */
+const d = DATA.days;
+$('#sub').innerHTML = `Comptage direct des transcripts sur disque — ${
+  DATA.meta.roots.map(([k]) => k).join(', ')}. ${fmt(DATA.meta.files)} fichiers lus le ${
+  new Date(DATA.meta.generatedAt).toLocaleDateString('fr-FR')}, fuseau ${DATA.meta.tz}.`;
+$('#hero-n').textContent = DATA.hero.value;
+$('#hero-l').innerHTML = 'conversations lancées avec un agent de codage.'
+  + (DATA.hero.derived > 0
+    ? `<br>S’y ajoutent <b>${fmt(DATA.hero.derived)}</b> transcripts de sous-agents, `
+      + `ouverts par l’IA elle-même.` : '');
+$('#tiles').innerHTML = DATA.tiles.map((t) =>
+  `<div class="tile"><div class="lb">${t[0]}</div><div class="v">${t[1]}</div><div class="d">${t[2]}</div></div>`).join('');
+
+/* ── 1. sessions par surface ─────────────────────────────────────────────── */
+(function(){
+  const dd = DATA.surfaces;
+  if (!dd.length) { $('#card-surf').remove(); return; }
+  const svg = $('#c-surf');
+  const L = 220, R = 76, band = 34, H = dd.length * band + 10, VW = 980;
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`); svg.setAttribute('height', H);
+  const max = Math.max(...dd.map((x) => x.v)), W = VW - L - R;
+  el('line', { x1: L, y1: 2, x2: L, y2: H - 8, class: 'ax' }, svg);
+  dd.forEach((x, i) => {
+    const y = i * band + 6, w = Math.max(3, x.v / max * W), bh = 20;
+    txt(x.name.length > 34 ? x.name.slice(0, 33) + '…' : x.name,
+      { x: L - 12, y: y + bh / 2 + 4, 'text-anchor': 'end', fill: 'var(--text-secondary)' }, svg);
+    el('path', { d: hbar(L, y, w, bh), fill: 'var(--s1)' }, svg);
+    txt(fmt(x.v), { x: L + w + 10, y: y + bh / 2 + 4, class: 'val' }, svg);
+    const hit = el('rect', { x: L, y: y - 4, width: W + R - 10, height: band - 4, class: 'hit' }, svg);
+    hover(hit, `<b>${x.name}</b>
+      <div class="r"><span>sessions</span><b>${fmt(x.v)}</b></div>
+      <div class="r"><span>messages humains</span><b>${fmt(x.human)}</b></div>
+      <div class="r"><span>messages IA</span><b>${fmt(x.ai)}</b></div>
+      <div class="r"><span>tokens</span><b>${compact(x.tokens)}</b></div>`);
+  });
+  table('t-surf', ['Surface', 'Sessions', 'Humain', 'IA', 'Tokens'],
+    dd.map((x) => [x.name, fmt(x.v), fmt(x.human), fmt(x.ai), fmt(x.tokens)]));
+})();
+
+/* ── 2. timeline empilée ─────────────────────────────────────────────────── */
+(function(){
+  const t = DATA.timeline;
+  if (!t.weeks.length || !t.series.length) { $('#card-tl').remove(); return; }
+  const svg = $('#c-tl');
+  const L = 48, R = 14, TOP = 10, BOT = 34, H = 268, VW = 1100;
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`); svg.setAttribute('height', H);
+  const n = t.weeks.length, W = VW - L - R, PH = H - TOP - BOT;
+  const tot = t.weeks.map((_, i) => t.values.reduce((a, s) => a + s[i], 0));
+  const max = niceMax(Math.max(...tot));
+  const step = W / n, bw = Math.max(2, Math.min(24, step - 3));
+  for (let g = 0; g <= 4; g++){
+    const y = TOP + PH - PH * g / 4;
+    el('line', { x1: L, y1: y, x2: VW - R, y2: y, class: 'gl' }, svg);
+    txt(compact(max * g / 4), { x: L - 9, y: y + 4, 'text-anchor': 'end', class: 'tick' }, svg);
+  }
+  el('line', { x1: L, y1: TOP + PH, x2: VW - R, y2: TOP + PH, class: 'ax' }, svg);
+  const every = Math.max(1, Math.ceil(n / 18));
+  t.weeks.forEach((w, i) => {
+    const x = L + i * step + (step - bw) / 2;
+    let acc = 0;
+    t.series.forEach((nm, si) => {
+      const v = t.values[si][i];
+      if (!v) return;
+      const h = v / max * PH, y = TOP + PH - acc - h;
+      const gap = acc > 0 ? 2 : 0;             // 2px de surface entre segments empilés
+      const hh = Math.max(1.5, h - gap);
+      const top = acc + h >= tot[i] - 0.01;
+      el('path', { d: top && hh > 5 ? vbar(x, y, bw, hh) : `M${x},${y+hh} v-${hh} h${bw} v${hh} z`,
+        fill: col(si) }, svg);
+      acc += h;
+    });
+    if (i % every === 0){
+      const yr = i === 0 || w.slice(5, 7) === '01';
+      txt(wlab(w) + (yr ? ' ' + w.slice(0, 4) : ''),
+        { x: x + bw / 2, y: H - 16, 'text-anchor': 'middle' }, svg);
+    }
+    const rows = t.series.map((nm, si) => t.values[si][i]
+      ? `<div class="r"><span><i style="background:${col(si)}"></i>${nm}</span><b>${fmt(t.values[si][i])}</b></div>` : '').join('');
+    const hit = el('rect', { x: L + i * step, y: TOP, width: step, height: PH, class: 'hit' }, svg);
+    hover(hit, `<b>semaine du ${wlab(w)} ${w.slice(0, 4)}</b>${
+      rows || '<div class="r"><span>aucune session</span></div>'}<div class="r"><span>total</span><b>${fmt(tot[i])}</b></div>`);
+  });
+  $('#l-tl').innerHTML = t.series.map((nm, i) =>
+    `<span><i style="background:${col(i)}"></i>${nm}</span>`).join('');
+  $('#cs-tl').textContent = `${t.weeks.length} semaines, du ${wlab(t.weeks[0])} `
+    + `${t.weeks[0].slice(0, 4)} au ${wlab(t.weeks[n-1])} ${t.weeks[n-1].slice(0, 4)}.`;
+  table('t-tl', ['Semaine', ...t.series, 'Total'],
+    t.weeks.map((w, i) => [w, ...t.series.map((_, si) => fmt(t.values[si][i])), fmt(tot[i])]));
+})();
+
+/* ── 3. tokens par semaine, trois périmètres ─────────────────────────────── */
+const TOKVIEW = {
+  total: ['cache compris', 'tout ce qui a traversé un modèle — la base de facturation'],
+  fresh: ['hors relectures', 'input + output + écriture de cache : le contenu vu une 1ʳᵉ fois'],
+  io: ['input + output', 'cache entièrement retiré'],
+};
+function drawTok(kind){
+  const raw = DATA.tokensWeekly, svg = $('#c-tok');
+  svg.textContent = '';
+  const from = raw.total.findIndex((v) => v > 0);
+  if (from === -1) { $('#card-tok').remove(); return; }
+  const w0 = raw.weeks.slice(from);
+  const cur = raw[kind].slice(from);
+  const all = { total: raw.total.slice(from), fresh: raw.fresh.slice(from), io: raw.io.slice(from) };
+  $('#cs-tok').innerHTML = `Périmètre affiché : <b>${TOKVIEW[kind][0]}</b> — ${TOKVIEW[kind][1]}.`;
+  const L = 48, R = 10, TOP = 10, BOT = 32, H = 210, VW = 560;
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`); svg.setAttribute('height', H);
+  const n = w0.length, W = VW - L - R, PH = H - TOP - BOT;
+  const max = niceMax(Math.max(...cur));
+  const step = W / n, bw = Math.max(2, Math.min(24, step - 2));
+  for (let g = 0; g <= 4; g++){
+    const y = TOP + PH - PH * g / 4;
+    el('line', { x1: L, y1: y, x2: VW - R, y2: y, class: 'gl' }, svg);
+    txt(compact(max * g / 4), { x: L - 8, y: y + 4, 'text-anchor': 'end', class: 'tick' }, svg);
+  }
+  el('line', { x1: L, y1: TOP + PH, x2: VW - R, y2: TOP + PH, class: 'ax' }, svg);
+  const peak = cur.indexOf(Math.max(...cur));
+  const every = Math.max(1, Math.ceil(n / 8));
+  w0.forEach((w, i) => {
+    const x = L + i * step + (step - bw) / 2;
+    if (cur[i] > 0){
+      const h = Math.max(2, cur[i] / max * PH), y = TOP + PH - h;
+      el('path', { d: vbar(x, y, bw, h), fill: 'var(--s1)' }, svg);
+      if (i === peak) txt(compact(cur[i]), { x: x + bw / 2, y: y - 7, 'text-anchor': 'middle', class: 'val' }, svg);
+    }
+    if (i % every === 0) txt(wlab(w), { x: x + bw / 2, y: H - 14, 'text-anchor': 'middle' }, svg);
+    const hit = el('rect', { x: L + i * step, y: TOP, width: step, height: PH, class: 'hit' }, svg);
+    hover(hit, `<b>semaine du ${wlab(w)} ${w.slice(0, 4)}</b>
+      <div class="r"><span>cache compris</span><b>${compact(all.total[i])}</b></div>
+      <div class="r"><span>hors relectures</span><b>${compact(all.fresh[i])}</b></div>
+      <div class="r"><span>input + output</span><b>${compact(all.io[i])}</b></div>`);
+  });
+  table('t-tok', ['Semaine', 'Cache compris', 'Hors relectures', 'Input + output'],
+    w0.map((w, i) => [w, fmt(all.total[i]), fmt(all.fresh[i]), fmt(all.io[i])]));
+}
+drawTok('total');
+document.querySelectorAll('#seg-tok button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('#seg-tok button').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+  drawTok(b.dataset.k);
+}));
+
+/* ── 4. profil horaire ───────────────────────────────────────────────────── */
+(function(){
+  const h = DATA.hours.localHuman, svg = $('#c-hr');
+  if (!h.some((v) => v > 0)) { $('#card-hr').remove(); return; }
+  const L = 44, R = 10, TOP = 10, BOT = 32, H = 210, VW = 560;
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`); svg.setAttribute('height', H);
+  const W = VW - L - R, PH = H - TOP - BOT, step = W / 24, bw = Math.min(24, step - 4);
+  const max = niceMax(Math.max(...h));
+  for (let g = 0; g <= 4; g++){
+    const y = TOP + PH - PH * g / 4;
+    el('line', { x1: L, y1: y, x2: VW - R, y2: y, class: 'gl' }, svg);
+    txt(fmt(max * g / 4), { x: L - 8, y: y + 4, 'text-anchor': 'end', class: 'tick' }, svg);
+  }
+  el('line', { x1: L, y1: TOP + PH, x2: VW - R, y2: TOP + PH, class: 'ax' }, svg);
+  const peak = h.indexOf(Math.max(...h));
+  h.forEach((v, i) => {
+    const x = L + i * step + (step - bw) / 2;
+    const bh = Math.max(2, v / max * PH), y = TOP + PH - bh;
+    el('path', { d: vbar(x, y, bw, bh), fill: 'var(--s1)' }, svg);
+    if (i === peak) txt(fmt(v), { x: x + bw / 2, y: y - 7, 'text-anchor': 'middle', class: 'val' }, svg);
+    if (i % 3 === 0) txt(i + 'h', { x: x + bw / 2, y: H - 14, 'text-anchor': 'middle' }, svg);
+    const hit = el('rect', { x: L + i * step, y: TOP, width: step, height: PH, class: 'hit' }, svg);
+    hover(hit, `<b>${i}h – ${i+1}h</b>
+      <div class="r"><span>messages humains</span><b>${fmt(v)}</b></div>
+      <div class="r"><span>tous messages</span><b>${fmt(DATA.hours.localAll[i])}</b></div>`);
+  });
+  $('#cs-hr').innerHTML = `Messages tapés par un humain, heure locale (${DATA.meta.tz}). `
+    + `Pointe à <b>${DATA.hours.peakLocal} h</b> — ${DATA.hours.peakUtc} h UTC.`;
+  table('t-hr', ['Heure', 'Messages humains', 'Tous messages'],
+    h.map((v, i) => [i + 'h', fmt(v), fmt(DATA.hours.localAll[i])]));
+})();
+
+/* ── 5. donut modèles ────────────────────────────────────────────────────── */
+(function(){
+  const dd = DATA.models, svg = $('#c-mod');
+  if (!dd.length) { $('#card-mod').remove(); return; }
+  const VW = 560, H = Math.max(210, dd.length * 29 + 24), cx = 112, cy = 105, r = 74, w = 26;
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`); svg.setAttribute('height', H);
+  const tot = dd.reduce((a, x) => a + x.v, 0);
+  let a0 = -Math.PI / 2;
+  const GAP = 0.022;                            // 2px de surface entre parts
+  dd.forEach((x, i) => {
+    const sw = x.v / tot * Math.PI * 2;
+    const s = a0 + GAP / 2, e = a0 + sw - GAP / 2;
+    if (e > s){
+      const P = (ang, rad) => [cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad];
+      const [x1, y1] = P(s, r), [x2, y2] = P(e, r), [x3, y3] = P(e, r - w), [x4, y4] = P(s, r - w);
+      const la = (e - s) > Math.PI ? 1 : 0;
+      const seg = el('path', { d: `M${x1},${y1} A${r},${r} 0 ${la} 1 ${x2},${y2} L${x3},${y3} `
+        + `A${r-w},${r-w} 0 ${la} 0 ${x4},${y4} Z`, fill: x.name === 'Autres' ? 'var(--other)' : col(i) }, svg);
+      hover(seg, `<b>${x.name}</b>
+        <div class="r"><span>tokens</span><b>${compact(x.v)}</b></div>
+        <div class="r"><span>part</span><b>${pct(x.v / tot)}</b></div>`);
+    }
+    a0 += sw;
+  });
+  txt(compact(tot), { x: cx, y: cy + 2, 'text-anchor': 'middle', class: 'val', 'font-size': 19 }, svg);
+  txt('tokens', { x: cx, y: cy + 19, 'text-anchor': 'middle' }, svg);
+  dd.forEach((x, i) => {
+    const y = 26 + i * 29;
+    el('rect', { x: 236, y: y - 9, width: 11, height: 11, rx: 3,
+      fill: x.name === 'Autres' ? 'var(--other)' : col(i) }, svg);
+    txt(x.name, { x: 255, y, fill: 'var(--text-secondary)' }, svg);
+    txt(pct(x.v / tot), { x: VW - 14, y, 'text-anchor': 'end', class: 'val' }, svg);
+  });
+  $('#cs-mod').textContent = `Part de chaque modèle dans les ${compact(tot)} de tokens Claude Code.`;
+  table('t-mod', ['Modèle', 'Tokens', 'Part'],
+    dd.map((x) => [x.name, fmt(x.v), pct(x.v / tot)]));
+})();
+
+/* ── 6. outils ───────────────────────────────────────────────────────────── */
+(function(){
+  const dd = DATA.tools, svg = $('#c-tools');
+  if (!dd.length) { $('#card-tools').remove(); return; }
+  const L = 150, R = 62, band = 25, H = dd.length * band + 8, VW = 560;
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`); svg.setAttribute('height', H);
+  const max = Math.max(...dd.map((x) => x.v)), W = VW - L - R;
+  el('line', { x1: L, y1: 2, x2: L, y2: H - 6, class: 'ax' }, svg);
+  dd.forEach((x, i) => {
+    const y = i * band + 5, w = Math.max(3, x.v / max * W), bh = 15;
+    txt(x.name.length > 22 ? x.name.slice(0, 21) + '…' : x.name,
+      { x: L - 11, y: y + bh / 2 + 4, 'text-anchor': 'end', fill: 'var(--text-secondary)' }, svg);
+    el('path', { d: hbar(L, y, w, bh), fill: 'var(--s1)' }, svg);
+    txt(compact(x.v), { x: L + w + 9, y: y + bh / 2 + 4, class: 'val' }, svg);
+    const hit = el('rect', { x: L, y: y - 3, width: W + R - 8, height: band - 2, class: 'hit' }, svg);
+    hover(hit, `<b>${x.name}</b><div class="r"><span>appels</span><b>${fmt(x.v)}</b></div>`);
+  });
+  table('t-tools', ['Outil', 'Appels'], dd.map((x) => [x.name, fmt(x.v)]));
+})();
+
+/* ── 7. lecture du total ─────────────────────────────────────────────────── */
+(function(){
+  const b = DATA.breakdown;
+  table('t-break',
+    ['Périmètre', 'Tokens', 'Part du total', 'Ce que ça mesure'],
+    [
+      ['Cache compris', fmt(b.total), pct(1), 'tout ce qui a traversé un modèle — la base de facturation'],
+      ['Hors relectures de cache', fmt(b.fresh), pct(b.fresh / b.total), 'input + output + écriture de cache'],
+      ['Input + output seuls', fmt(b.io), pct(b.io / b.total), 'cache entièrement retiré'],
+      ['Compteur naïf', fmt(b.naive), pct(b.naive / b.total), 'input + output, sans dédoublonnage'],
+    ]);
+  document.querySelectorAll('#t-break td:last-child, #t-break th:last-child').forEach((td) => {
+    td.classList.remove('n'); td.style.textAlign = 'left'; td.style.color = 'var(--muted)';
+  });
+  const share = b.total ? b.cacheRead / b.total : 0;
+  $('#n-break').innerHTML = `Les relectures de cache pèsent <b>${pct(share)}</b> du total. `
+    + `Une requête renvoie tout le contexte à chaque tour : le cache ne supprime pas ces tokens, `
+    + `il les facture 10 % du tarif d’entrée. Sur ${fmt(b.requests)} requêtes, cela fait `
+    + `<b>${fmt(Math.round(b.total / Math.max(b.requests, 1)))}</b> tokens de contexte par requête en moyenne.`;
+})();
+
+/* ── 8. notes ────────────────────────────────────────────────────────────── */
+(function(){
+  const roots = DATA.meta.roots.map(([k, v]) => `<li><b>${k}</b> — <code>${v.join('</code>, <code>')}</code></li>`).join('');
+  const notes = DATA.notes.map((x) => `<li>${x}</li>`).join('');
+  $('#notes').innerHTML = `<b>Sources lues</b><ul>${roots}</ul>`
+    + (notes ? `<b>Réserves</b><ul>${notes}</ul>` : '')
+    + `<br>${fmt(DATA.meta.files)} fichiers en ${(DATA.meta.durationMs / 1000).toFixed(1)} s · `
+    + `tarifs : ${DATA.meta.pricing} · généré par <b>aiusage</b>.`;
+})();
+
+$('#theme').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'light';
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  $('#theme').textContent = dark ? 'Thème sombre' : 'Thème clair';
+  $('#theme').setAttribute('aria-pressed', String(!dark));
+});
+</script>
+</body>
+</html>
