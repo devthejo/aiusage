@@ -70,8 +70,10 @@ tasks:
     cmds:
       # npm refuse de configurer un publieur de confiance sur un paquet inexistant
       # (npm/cli#8544) : la première version doit sortir d'une session authentifiée.
+      # `--provenance` exige un environnement CI avec OIDC : pas en local.
+      # npm demandera un code 2FA : à lancer dans un terminal interactif.
       - npm whoami
-      - npm publish --access public --provenance
+      - npm publish --access public
       - npm trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish
       - npm trust list aiusage
 

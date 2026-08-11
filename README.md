@@ -126,6 +126,8 @@ npm login
 task bootstrap-trust   # publie 0.1.0, puis déclare GitHub Actions publieur de confiance
 ```
 
+À lancer dans un terminal interactif : npm réclame un code 2FA à chaque étape.
+
 Les versions suivantes passent par la CI, sans jeton.
 
 ## Licence
