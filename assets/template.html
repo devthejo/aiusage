@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>aiusage — agents de codage sur cette machine</title>
+<title>ai-agent-stats — agents de codage sur cette machine</title>
 <style>
 .viz-root{
   color-scheme:light;
@@ -505,7 +505,7 @@ document.querySelectorAll('#seg-tok button').forEach((b) => b.addEventListener('
   $('#notes').innerHTML = `<b>Sources lues</b><ul>${roots}</ul>`
     + (notes ? `<b>Réserves</b><ul>${notes}</ul>` : '')
     + `<br>${fmt(DATA.meta.files)} fichiers en ${(DATA.meta.durationMs / 1000).toFixed(1)} s · `
-    + `tarifs : ${DATA.meta.pricing} · généré par <b>aiusage</b>.`;
+    + `tarifs : ${DATA.meta.pricing} · généré par <b>ai-agent-stats</b>.`;
 })();
 
 $('#theme').addEventListener('click', () => {

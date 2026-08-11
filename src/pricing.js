@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 
 const URL_LITELLM =
   'https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json';
-const CACHE_DIR = join(process.env.XDG_CACHE_HOME || join(homedir(), '.cache'), 'aiusage');
+const CACHE_DIR = join(process.env.XDG_CACHE_HOME || join(homedir(), '.cache'), 'ai-agent-stats');
 const CACHE = join(CACHE_DIR, 'model_prices.json');
 const MAX_AGE_MS = 24 * 3600 * 1000;
 

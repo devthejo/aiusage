@@ -11,25 +11,25 @@ tasks:
   run:
     desc: Rapport web (collecte + ouverture du navigateur)
     cmds:
-      - node bin/aiusage.js {{.CLI_ARGS}}
+      - node bin/ai-agent-stats.js {{.CLI_ARGS}}
 
   term:
     desc: Rapport terminal
     cmds:
-      - node bin/aiusage.js --terminal {{.CLI_ARGS}}
+      - node bin/ai-agent-stats.js --terminal {{.CLI_ARGS}}
 
   json:
     desc: Rapport brut en JSON dans build/report.json
     cmds:
       - mkdir -p build
-      - node bin/aiusage.js --json --quiet > build/report.json
+      - node bin/ai-agent-stats.js --json --quiet > build/report.json
       - 'echo "→ build/report.json ($(du -h build/report.json | cut -f1))"'
 
   html:
     desc: Rapport HTML dans build/report.html, sans ouvrir le navigateur
     cmds:
       - mkdir -p build
-      - node bin/aiusage.js --out build/report.html --no-open
+      - node bin/ai-agent-stats.js --out build/report.html --no-open
 
   test:
     desc: Tests unitaires
@@ -40,13 +40,13 @@ tasks:
     desc: Tests + vérification que le CLI démarre et produit un rapport complet
     deps: [test]
     cmds:
-      - node bin/aiusage.js --help > /dev/null
-      - node bin/aiusage.js --json --quiet | node scripts/assert-report.js
+      - node bin/ai-agent-stats.js --help > /dev/null
+      - node bin/ai-agent-stats.js --json --quiet | node scripts/assert-report.js
 
   bench:
     desc: Chronomètre une collecte complète
     cmds:
-      - 'time node bin/aiusage.js --json --quiet > /dev/null'
+      - 'time node bin/ai-agent-stats.js --json --quiet > /dev/null'
 
   pack:
     desc: Construit le tarball npm et liste son contenu
@@ -62,8 +62,8 @@ tasks:
     desc: Qui suis-je sur npm, et le paquet existe-t-il ?
     cmds:
       - 'npm whoami || echo "→ non authentifié : lance npm login"'
-      - 'npm view aiusage version 2>/dev/null || echo "→ paquet pas encore publié"'
-      - 'npm trust list aiusage 2>/dev/null || true'
+      - 'npm view ai-agent-stats version 2>/dev/null || echo "→ paquet pas encore publié"'
+      - 'npm trust list ai-agent-stats 2>/dev/null || true'
 
   bootstrap:
     desc: "Amorçage : publie la 1re version puis déclare GitHub Actions publieur de confiance"
@@ -83,8 +83,8 @@ tasks:
     vars:
       NPM: npx --yes npm@11
     cmds:
-      - '{{.NPM}} trust github aiusage --file publish.yml --repo devthejo/aiusage --env npm --allow-publish'
-      - '{{.NPM}} trust list aiusage'
+      - '{{.NPM}} trust github ai-agent-stats --file publish.yml --repo devthejo/ai-agent-stats --env npm --allow-publish'
+      - '{{.NPM}} trust list ai-agent-stats'
 
   release:
     desc: 'Pose une version, taggue et pousse — la CI publie sur la Release GitHub. Ex: task release -- 0.2.0'

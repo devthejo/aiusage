@@ -8,13 +8,13 @@ import { renderTerminal } from '../src/report/terminal.js';
 import { renderHtml } from '../src/report/html.js';
 
 const HELP = `
-  aiusage — compte tes sessions, messages et tokens d'agents de codage.
+  ai-agent-stats — compte tes sessions, messages et tokens d'agents de codage.
 
   Lit les transcripts déjà sur ton disque : Claude Code (toutes surfaces et
   sous-agents), Roo Code / Cline / Kilo Code, Codex. Rien n'est envoyé nulle part.
 
   Usage
-    npx aiusage [options]
+    npx ai-agent-stats [options]
 
   Options
     -w, --web            rapport HTML ouvert dans le navigateur   (défaut)
@@ -30,11 +30,11 @@ const HELP = `
     -V, --version        version
 
   Exemples
-    npx aiusage                        rapport web
-    npx aiusage -t                     rapport terminal
-    npx aiusage -t --no-color          terminal sans couleurs (ou NO_COLOR=1)
-    npx aiusage -j > usage.json        données brutes
-    npx aiusage -o ~/rapport.html      HTML à un emplacement choisi
+    npx ai-agent-stats                        rapport web
+    npx ai-agent-stats -t                     rapport terminal
+    npx ai-agent-stats -t --no-color          terminal sans couleurs (ou NO_COLOR=1)
+    npx ai-agent-stats -j > usage.json        données brutes
+    npx ai-agent-stats -o ~/rapport.html      HTML à un emplacement choisi
 `;
 
 function parseArgs(argv) {
@@ -44,7 +44,7 @@ function parseArgs(argv) {
     const next = () => {
       const v = argv[++i];
       if (v === undefined) {
-        console.error(`aiusage: valeur manquante après ${a}`);
+        console.error(`ai-agent-stats: valeur manquante après ${a}`);
         process.exit(2);
       }
       return v;
@@ -63,7 +63,7 @@ function parseArgs(argv) {
       case '-h': case '--help': o.help = true; break;
       case '-V': case '--version': o.version = true; break;
       default:
-        console.error(`aiusage: option inconnue « ${a} »\nEssaie: npx aiusage --help`);
+        console.error(`ai-agent-stats: option inconnue « ${a} »\nEssaie: npx ai-agent-stats --help`);
         process.exit(2);
     }
   }
@@ -113,13 +113,13 @@ try {
   });
 } catch (e) {
   if (onProgress) process.stderr.write('\r\x1b[K');
-  console.error(`aiusage: la collecte a échoué — ${e.message}`);
+  console.error(`ai-agent-stats: la collecte a échoué — ${e.message}`);
   process.exit(1);
 }
 if (onProgress) process.stderr.write('\r\x1b[K');
 
 if (!report.totals.sessions) {
-  console.error('aiusage: aucun transcript trouvé.\n'
+  console.error('ai-agent-stats: aucun transcript trouvé.\n'
     + '  Emplacements inspectés :\n'
     + Object.entries(report.meta.roots)
       .map(([k, v]) => `    ${k} : ${v.length ? v.join(', ') : 'aucun'}`).join('\n')
@@ -140,7 +140,7 @@ if (opts.mode === 'terminal') {
 const html = renderHtml(report);
 const file = opts.out
   ? resolve(opts.out)
-  : join(tmpdir(), `aiusage-${new Date(report.meta.generatedAt).toISOString().slice(0, 10)}.html`);
+  : join(tmpdir(), `ai-agent-stats-${new Date(report.meta.generatedAt).toISOString().slice(0, 10)}.html`);
 mkdirSync(dirname(file), { recursive: true });
 writeFileSync(file, html);
 console.error(`  rapport écrit : ${file}`);

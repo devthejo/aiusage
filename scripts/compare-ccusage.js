@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Confronte les totaux de tokens d'aiusage à ceux de ccusage, sur le périmètre
+ * Confronte les totaux de tokens d'ai-agent-stats à ceux de ccusage, sur le périmètre
  * commun (Claude Code + Codex — ccusage ne lit pas Roo Code / Cline).
  * ccusage est la référence : tout écart au-delà du bruit est un bug chez nous.
  */
@@ -30,7 +30,7 @@ const theirs = {
 
 const f = (v) => v.toLocaleString('fr-FR').padStart(17);
 let bad = 0;
-console.log('  champ            aiusage          ccusage      écart');
+console.log('  champ            ai-agent-stats          ccusage      écart');
 for (const [k, v] of mine) {
   const d = theirs[k] ? ((v - theirs[k]) / theirs[k]) * 100 : 0;
   if (Math.abs(d) > TOL) bad++;

@@ -6,7 +6,7 @@
   ],
   "shell": {
     "init_hook": [
-      "echo 'aiusage — tape `task` pour la liste des commandes'"
+      "echo 'ai-agent-stats — tape `task` pour la liste des commandes'"
     ]
   }
 }

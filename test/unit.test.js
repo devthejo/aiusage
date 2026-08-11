@@ -47,7 +47,7 @@ test('barres et sparklines restent dans leurs bornes', () => {
 test('walkFiles ignore les symlinks de répertoire',
   { skip: process.platform === 'win32' ? 'symlinks non créables sans privilèges' : false },
   () => {
-  const root = mkdtempSync(join(tmpdir(), 'aiusage-walk-'));
+  const root = mkdtempSync(join(tmpdir(), 'ai-agent-stats-walk-'));
   try {
     mkdirSync(join(root, 'a'));
     writeFileSync(join(root, 'a', 'x.jsonl'), '{}\n');

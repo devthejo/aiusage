@@ -42,14 +42,14 @@ jobs:
       - name: Sortie explicite sans données
         run: |
           set +e
-          out=$(node bin/aiusage.js --terminal --offline 2>&1)
+          out=$(node bin/ai-agent-stats.js --terminal --offline 2>&1)
           code=$?
           echo "$out"
           [ "$code" -eq 1 ] || { echo "code de sortie attendu 1, obtenu $code"; exit 1; }
           echo "$out" | grep -q 'aucun transcript trouvé' || { echo "message d'erreur inattendu"; exit 1; }
-      - run: node bin/aiusage.js --help
+      - run: node bin/ai-agent-stats.js --help
       - name: Le tarball s'installe et s'exécute
         run: |
           npm pack
-          npm install -g ./aiusage-*.tgz
-          aiusage --version
+          npm install -g ./ai-agent-stats-*.tgz
+          ai-agent-stats --version

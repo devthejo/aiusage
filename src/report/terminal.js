@@ -24,7 +24,7 @@ export function renderTerminal(r, { width: termWidth = process.stdout.columns ||
 
   // ── en-tête ──────────────────────────────────────────────────────────────
   out('');
-  out(c.b(c.accent('  aiusage')) + c.grey(`  ·  agents de codage sur cette machine`));
+  out(c.b(c.accent('  ai-agent-stats')) + c.grey(`  ·  agents de codage sur cette machine`));
   out('');
   const d = r.days;
   out(c.grey(`  ${frDate(d.first)} → ${frDate(d.last)}  ·  ${n(d.active)} jours actifs sur ${n(d.span)}`

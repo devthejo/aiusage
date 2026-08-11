@@ -1,10 +1,10 @@
-# aiusage
+# ai-agent-stats
 
 Compte tes sessions, tes messages et tes tokens d'agents de codage, à partir des
 transcripts déjà présents sur ta machine. Rien n'est envoyé nulle part.
 
 ```bash
-npx aiusage
+npx ai-agent-stats
 ```
 
 Le rapport HTML s'ouvre dans le navigateur. `-t` pour le terminal, `-j` pour le JSON.
@@ -46,7 +46,7 @@ cache porte l'essentiel du trafic.
 
 **Coût** — estimé au tarif API public, depuis la table
 [LiteLLM](https://github.com/BerriAI/litellm) mise en cache 24 h dans
-`~/.cache/aiusage`. Le tarif majoré du cache à TTL 1 h est appliqué quand le
+`~/.cache/ai-agent-stats`. Le tarif majoré du cache à TTL 1 h est appliqué quand le
 transcript le distingue. Roo Code et Cline déclarant eux-mêmes leur coût, celui-ci
 est repris tel quel. Sous forfait, ce n'est pas ce que tu paies.
 
@@ -69,7 +69,7 @@ est repris tel quel. Sous forfait, ce n'est pas ce que tu paies.
 ## Comme bibliothèque
 
 ```js
-import { buildReport, renderTerminal, renderHtml } from 'aiusage';
+import { buildReport, renderTerminal, renderHtml } from 'ai-agent-stats';
 
 const report = await buildReport({ tz: 'Europe/Paris' });
 console.log(report.tokens.total, report.totals.sessions);

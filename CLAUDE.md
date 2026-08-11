@@ -1,4 +1,4 @@
-# aiusage — état du projet
+# ai-agent-stats — état du projet
 
 CLI Node sans dépendance qui compte sessions, messages et tokens des agents de
 codage depuis les transcripts locaux, et rend un rapport HTML (défaut) ou terminal.
@@ -8,7 +8,7 @@ suffit à démarrer.
 
 ## Décisions verrouillées
 
-- **Zéro dépendance runtime.** `npx aiusage` doit démarrer sans rien installer.
+- **Zéro dépendance runtime.** `npx ai-agent-stats` doit démarrer sans rien installer.
   Tout est Node natif : `worker_threads`, `fetch`, `node:test`.
 - **Le français est la langue du produit** (aide, rapports, README). Les chaînes
   visibles vivent dans `src/report/terminal.js` et `assets/template.html` : une
@@ -62,7 +62,7 @@ suffit à démarrer.
 ## Structure
 
 ```
-bin/aiusage.js        CLI : options, progression, ouverture du navigateur
+bin/ai-agent-stats.js        CLI : options, progression, ouverture du navigateur
 src/index.js          buildReport() — point d'entrée programmatique
 src/paths.js          où chaque outil range ses transcripts, par OS
 src/collect/*.js      un collecteur par famille d'outil

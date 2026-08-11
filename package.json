@@ -1,5 +1,5 @@
 {
-  "name": "aiusage",
+  "name": "ai-agent-stats",
   "version": "0.1.0",
   "description": "Compte tes sessions, messages et tokens d'agents de codage — Claude Code, Roo Code, Cline, Codex — depuis les transcripts sur disque. Rapport HTML ou terminal.",
   "keywords": [
@@ -12,19 +12,20 @@
     "stats",
     "cli"
   ],
-  "homepage": "https://github.com/devthejo/aiusage#readme",
+  "homepage": "https://github.com/devthejo/ai-agent-stats#readme",
   "bugs": {
-    "url": "https://github.com/devthejo/aiusage/issues"
+    "url": "https://github.com/devthejo/ai-agent-stats/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/devthejo/aiusage.git"
+    "url": "git+https://github.com/devthejo/ai-agent-stats.git"
   },
   "license": "MIT",
   "author": "devthejo",
   "type": "module",
   "bin": {
-    "aiusage": "bin/aiusage.js"
+    "ai-agent-stats": "bin/ai-agent-stats.js",
+    "aistats": "bin/ai-agent-stats.js"
   },
   "exports": {
     ".": "./src/index.js"
@@ -40,7 +41,7 @@
     "node": ">=18.17"
   },
   "scripts": {
-    "start": "node bin/aiusage.js",
+    "start": "node bin/ai-agent-stats.js",
     "test": "node --test test/unit.test.js"
   }
 }
