@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-stats",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Compte tes sessions, messages et tokens d'agents de codage — Claude Code, Roo Code, Cline, Codex — depuis les transcripts sur disque. Rapport HTML ou terminal.",
   "keywords": [
     "claude-code",
