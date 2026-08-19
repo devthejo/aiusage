@@ -17,7 +17,7 @@ const HELP = `
     npx ai-agent-stats [options]
 
   Options
-    -w, --web            rapport HTML ouvert dans le navigateur   (défaut)
+    -w, --web            rapport HTML + rapport terminal          (défaut)
     -t, --terminal       rapport dans le terminal
     -j, --json           rapport brut en JSON sur la sortie standard
     -o, --out <fichier>  écrit le rapport dans ce fichier au lieu d'un temporaire
@@ -97,6 +97,12 @@ function progressBar(quiet) {
   };
 }
 
+// Un lecteur qui ferme le tuyau (`| head`, Ctrl-C côté pager) ne doit pas faire
+// planter la collecte ni empêcher l'écriture du HTML.
+process.stdout.on('error', (e) => {
+  if (e.code !== 'EPIPE') throw e;
+});
+
 const opts = parseArgs(process.argv.slice(2));
 if (opts.help) { console.log(HELP); process.exit(0); }
 if (opts.version) {
@@ -127,21 +133,20 @@ if (!report.totals.sessions) {
   process.exit(1);
 }
 
+// Pas de process.exit() après un write : il tronquerait un stdout non vidé
+// (pipe > 64 Kio) ; le process sort naturellement une fois les flux à plat.
 if (opts.mode === 'json') {
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-  process.exit(0);
-}
-
-if (opts.mode === 'terminal') {
+} else {
   process.stdout.write(`${renderTerminal(report)}\n`);
-  process.exit(0);
+  if (opts.mode === 'web') {
+    const html = renderHtml(report);
+    const file = opts.out
+      ? resolve(opts.out)
+      : join(tmpdir(), `ai-agent-stats-${new Date(report.meta.generatedAt).toISOString().slice(0, 10)}.html`);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, html);
+    console.error(`  rapport écrit : ${file}`);
+    if (opts.open) openInBrowser(file);
+  }
 }
-
-const html = renderHtml(report);
-const file = opts.out
-  ? resolve(opts.out)
-  : join(tmpdir(), `ai-agent-stats-${new Date(report.meta.generatedAt).toISOString().slice(0, 10)}.html`);
-mkdirSync(dirname(file), { recursive: true });
-writeFileSync(file, html);
-console.error(`  rapport écrit : ${file}`);
-if (opts.open) openInBrowser(file);

@@ -7,7 +7,8 @@ transcripts déjà présents sur ta machine. Rien n'est envoyé nulle part.
 npx ai-agent-stats
 ```
 
-Le rapport HTML s'ouvre dans le navigateur. `-t` pour le terminal, `-j` pour le JSON.
+Le rapport s'affiche dans le terminal et sa version HTML s'ouvre dans le
+navigateur. `-t` pour le terminal seul, `-j` pour le JSON.
 
 ## Ce qui est lu
 
@@ -53,7 +54,7 @@ est repris tel quel. Sous forfait, ce n'est pas ce que tu paies.
 ## Options
 
 ```
--w, --web            rapport HTML ouvert dans le navigateur   (défaut)
+-w, --web            rapport HTML + rapport terminal          (défaut)
 -t, --terminal       rapport dans le terminal
 -j, --json           rapport brut en JSON sur la sortie standard
 -o, --out <fichier>  écrit le rapport dans ce fichier au lieu d'un temporaire

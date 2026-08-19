@@ -1,10 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { hash53, isoWeekStart, streaks, daysBetween, walkFiles } from '../src/util.js';
-import { compact, bar, spark } from '../src/report/format.js';
+import {
+  compact, bar, spark, sparkColored, barColored, width, clip, stripAnsi, money,
+} from '../src/report/format.js';
 import { aggregate } from '../src/aggregate.js';
 import { buildPayload, renderHtml } from '../src/report/html.js';
 import { renderTerminal } from '../src/report/terminal.js';
@@ -42,6 +46,43 @@ test('barres et sparklines restent dans leurs bornes', () => {
   assert.equal(bar(100, 100, 10).length, 10);
   assert.equal(spark([0, 0]).length, 2);
   assert.equal(spark([1, 8, 4]).length, 3);
+  assert.equal(width(sparkColored([1, 8, 4])), 3);
+  assert.equal(stripAnsi(sparkColored([1, 8, 4])), spark([1, 8, 4]));
+  assert.equal(width(barColored(100, 100, 10)), 10);
+  assert.equal(stripAnsi(barColored(50, 100, 10)), bar(50, 100, 10));
+});
+
+test('largeur affichée : ANSI ignoré, emojis et CJK doubles, combinantes nulles', () => {
+  assert.equal(width('abc'), 3);
+  assert.equal(width('é—·'), 3);
+  assert.equal(width('\x1b[1mabc\x1b[0m'), 3);
+  assert.equal(width('🔥'), 2);
+  assert.equal(width('⚡'), 2);
+  assert.equal(width('✨ ai'), 5);
+  assert.equal(width('█▁─'), 3, 'blocs et filets restent simples');
+  assert.equal(width('文書'), 4, 'les idéogrammes occupent deux colonnes');
+  assert.equal(width('가나'), 4, 'le hangul aussi');
+  assert.equal(width('ＡＢ'), 4, 'formes pleine chasse');
+  assert.equal(width('cafe\u0301'), 4, 'accent combinant (NFD) : largeur nulle');
+  assert.equal(width('a\u200bb'), 2, 'largeur nulle pour les caractères de format');
+});
+
+test('money : deux décimales sous 10 $, entier au-delà', () => {
+  assert.equal(money(0.42), '$0,42');
+  assert.equal(money(9.99), '$9,99');
+  assert.equal(money(12.6), '$13');
+  assert.equal(money(0), '$0');
+});
+
+test('clip tronque aux colonnes affichées, ANSI préservé', () => {
+  assert.equal(clip('abcdef', 10), 'abcdef');
+  assert.equal(clip('abcdef', 4), 'abc…');
+  assert.equal(clip('🔥🔥🔥', 4), '🔥…', 'un emoji occupe deux colonnes');
+  const colored = clip('\x1b[1mabcdef\x1b[0m', 4);
+  assert.equal(stripAnsi(colored), 'abc…');
+  assert.ok(colored.endsWith('\x1b[0m'), 'la coupe referme la couleur');
+  assert.ok(width(clip('\x1b]8;;http://x\x07abcdefgh', 6)) <= 6,
+    'une séquence ESC non-SGR ne fait pas déborder la coupe');
 });
 
 test('walkFiles ignore les symlinks de répertoire',
@@ -131,6 +172,7 @@ test('les deux rendus acceptent un rapport minimal', () => {
   const term = renderTerminal(r, { width: 100 });
   assert.match(term, /VUE D’ENSEMBLE/);
   assert.match(term, /Claude Code — extension VS Code/);
+  assert.match(term, /POUR SITUER/);
 
   const payload = buildPayload(r);
   assert.equal(payload.hero.value, '1');
@@ -140,4 +182,83 @@ test('les deux rendus acceptent un rapport minimal', () => {
   assert.ok(html.includes('<!DOCTYPE html>'));
   assert.ok(!html.includes('/*__DATA__*/null'), 'les données doivent être injectées');
   assert.ok(!html.includes('</script>{'), 'le JSON ne doit pas casser la balise script');
+});
+
+test('les encadrés du rendu terminal ont un bord droit aligné', () => {
+  const r = aggregate(fixture());
+  for (const w of [58, 74, 100, 120]) {
+    const lines = renderTerminal(r, { width: w }).split('\n')
+      .filter((l) => l.includes('│') || l.includes('╭') || l.includes('╰'));
+    assert.ok(lines.length > 10, 'le rendu doit être encadré');
+    const widths = new Set(lines.map((l) => width(l)));
+    assert.equal(widths.size, 1,
+      `toutes les lignes encadrées font la même largeur (largeur ${w} : ${[...widths]})`);
+  }
+});
+
+test('le rendu coloré est le rendu neutre plus des couleurs bien formées', () => {
+  const r = aggregate(fixture());
+  const plain = renderTerminal(r, { width: 100, color: false });
+  const colored = renderTerminal(r, { width: 100, color: true });
+  assert.equal(plain.includes('\x1b'), false, 'sans couleur, zéro code ANSI');
+  assert.ok(/\x1b\[38;5;\d+m/.test(colored), 'avec couleur, des codes 256 présents');
+  assert.equal(stripAnsi(colored), plain, 'mêmes caractères sous les couleurs');
+  assert.ok(!colored.includes('undefined'), 'aucun code couleur indéfini');
+  const lines = colored.split('\n').filter((l) => l.includes('│'));
+  const widths = new Set(lines.map((l) => width(l)));
+  assert.equal(widths.size, 1, 'les encadrés colorés restent alignés');
+});
+
+test('bout en bout : les trois modes du CLI sur un transcript minimal', () => {
+  const home = mkdtempSync(join(tmpdir(), 'ai-agent-stats-e2e-'));
+  const proj = join(home, 'claude-config', 'projects', 'mon-projet');
+  mkdirSync(proj, { recursive: true });
+  writeFileSync(join(proj, 'sess1.jsonl'), [
+    JSON.stringify({
+      type: 'user', timestamp: '2026-08-10T09:00:00Z', entrypoint: 'claude-vscode',
+      version: '2.0.0', cwd: '/x', message: { content: 'salut' },
+    }),
+    JSON.stringify({
+      type: 'assistant', timestamp: '2026-08-10T09:00:05Z', requestId: 'req_1',
+      message: {
+        id: 'msg_1', model: 'claude-opus-5',
+        content: [{ type: 'text', text: 'bonjour' }],
+        usage: {
+          input_tokens: 10, output_tokens: 100,
+          cache_creation_input_tokens: 50, cache_read_input_tokens: 200,
+        },
+      },
+    }),
+  ].join('\n'));
+  const env = {
+    ...process.env,
+    HOME: home,
+    USERPROFILE: home,
+    XDG_CONFIG_HOME: join(home, '.config'),
+    CLAUDE_CONFIG_DIR: join(home, 'claude-config'),
+    NO_COLOR: '1',
+  };
+  const bin = fileURLToPath(new URL('../bin/ai-agent-stats.js', import.meta.url));
+  const run = (...args) => spawnSync(process.execPath, [bin, '--offline', '-q', ...args],
+    { env, encoding: 'utf8' });
+  try {
+    const json = run('--json');
+    assert.equal(json.status, 0, json.stderr);
+    const report = JSON.parse(json.stdout);
+    assert.equal(report.totals.sessions, 1);
+    assert.equal(report.tokens.total, 10 + 100 + 50 + 200);
+
+    const term = run('--terminal');
+    assert.equal(term.status, 0, term.stderr);
+    assert.match(term.stdout, /VUE D’ENSEMBLE/);
+    assert.equal(term.stdout.includes('\x1b'), false, 'NO_COLOR respecté');
+
+    const out = join(home, 'rapport.html');
+    const web = run('--out', out, '--no-open');
+    assert.equal(web.status, 0, web.stderr);
+    assert.match(web.stdout, /VUE D’ENSEMBLE/, 'le mode web affiche aussi le rapport terminal');
+    assert.match(readFileSync(out, 'utf8'), /^<!DOCTYPE html>/, 'le HTML est bien écrit');
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
 });
